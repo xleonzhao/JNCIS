@@ -233,11 +233,13 @@ same packet format as Type 3, but with
 
 ### Stub Area and its Variants
 
--   The purpose is to reduce the database size.
 -   Commonly combined with a default route.
+-   All routers in this area knows how to reach each other and their attached networks. All unknown destinations go to default route
 -   Inform ABR to stop generating/injecting certain type LSA into this area.
+-   The purpose is to reduce the database size.
 
-**Type**
+**Stub area types**
+
 * Stub Area: no AS external LSA (type 5) and ASBR summary LSA (type 4) in this area, i.e., only type 1,2,3 allowed in this area.
 * Totally Stub Area: No AS summary LSA (type 3) in this area, i.e., only type 1,2 allowed in this area.
 * Not-So-Stubby Area (NSSA): allow AS external LSA (in type 7 format which then be translated to type 5) be sent out of this area, but still not into this area (still a stub), i.e., only type 1,2,7 allowed in this area.
