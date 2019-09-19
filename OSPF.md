@@ -49,7 +49,9 @@ show ospf database nssa
     -   bit 3: N/P bit. set if support not-so-stubby LSA
     -   bit 1: E bit, set if support type 5 external LSA.
 
-Type:
+### LSA Type:
+
+* the most important thing is to exchange node/link information, so _G=<V,E>_ can be constructed.
 
 -   1: **Router LSA** (node/link info)
 -   2: Network LSA
@@ -68,7 +70,6 @@ Type:
 ### Type 1: The Router LSA
 
 -   Area scope
--   forms the basic inputs to SPF algorithm. router (node) and link info are here, so _G=<E,V>_ can be constructed.
 
 <!-- -->
 
