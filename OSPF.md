@@ -4,6 +4,55 @@ OSPF: Open Shortest Path First
 -   <http://www.networksorcery.com/enp/rfc/rfc2328.txt>
 -   <http://www.networksorcery.com/enp/protocol/ospf.htm>
 
+Terms
+--------
+
+* AS: under single administrative control. (same as BGP AS)
+* Area: usually, an OSPF network is divided into multiple areas, with a backbone area and multiple stub areas.
+* ABR: Area Border Router, whose interfaces are in both backbone area and stub area.
+* ASBR: AS Border Router, which speaks multiple routing protocols (IGP and EGP), and import/export routes between IGP and EGP.
+
+### Stub Area and its Variants
+
+-   Routers in this area knows everything about their own world, and nothing about outside (except ABR). All unknowns throw to default route.
+-   The purpose is to reduce the database size.
+
+**Stub area types**
+
+> decide how much a router in stub area should know
+> Inform ABR to stop generating/injecting certain type LSA into this area.
+* Stub Area: no AS external LSA (type 5) and ASBR summary LSA (type 4) in this area, i.e., only type 1,2,3 allowed in this area.
+* Totally Stub Area: No AS summary LSA (type 3) in this area, i.e., only type 1,2 allowed in this area.
+* Not-So-Stubby Area (NSSA): allow AS external LSA (in type 7 format which then be translated to type 5) be sent out of this area, but still not into this area (still a stub), i.e., only type 1,2,7 allowed in this area.
+
+**Configuration**
+
+-   Stub area
+
+For *all* routers in the stub area
+
+    [edit protocol ospf]
+    area 0.0.0.5 {
+      stub
+
+For ABR which connects stub area and backbone area, it needs to provide default route (0/0)
+
+    [edit protocol ospf]
+    area 0.0.0.5 {
+      stub default-metric 20 <<< metric for default route
+
+-   Furthermore, to configure a totally stub area, add *no-summaries* after default-metric on ABR
+-   To configure a NSSA, just change *stub* to *nssa*. But on ABR, to configure default route, syntax is:
+
+<!-- -->
+
+    area 0.0.0.3 {
+    nssa {
+      default-lsa default-metric 25; <<< this will be a type-7 LSA into NSSA
+    }
+
+-   Furthermore, you can have a totally stubby NSSA by using *no-summaries*. 0/0 route will become a type-3 LSA. To opt it to a type-7 LSA, you can use *type-7* under *default-lsa*.
+
 Link-State Advertisements
 -------------------------
 
@@ -231,47 +280,6 @@ same packet format as Type 3, but with
     Type 2, TOS 0x0, metric 0, fwd addr 0.0.0.0, tag 0.0.0.0
 
 > It says "ASBR 192.168.0.1 advertised an external route 172.16.1.0/24 with total cost = 0"
-
-### Stub Area and its Variants
-
--   Commonly combined with a default route.
--   All routers in this area knows how to reach each other and their attached networks. All unknown destinations go to default route
--   Inform ABR to stop generating/injecting certain type LSA into this area.
--   The purpose is to reduce the database size.
-
-**Stub area types**
-
-* Stub Area: no AS external LSA (type 5) and ASBR summary LSA (type 4) in this area, i.e., only type 1,2,3 allowed in this area.
-* Totally Stub Area: No AS summary LSA (type 3) in this area, i.e., only type 1,2 allowed in this area.
-* Not-So-Stubby Area (NSSA): allow AS external LSA (in type 7 format which then be translated to type 5) be sent out of this area, but still not into this area (still a stub), i.e., only type 1,2,7 allowed in this area.
-
-**Configuration**
-
--   Stub area
-
-For *all* routers in the stub area
-
-    [edit protocol ospf]
-    area 0.0.0.5 {
-      stub
-
-For ABR which connects stub area and backbone area, it needs to provide default route (0/0)
-
-    [edit protocol ospf]
-    area 0.0.0.5 {
-      stub default-metric 20 <<< metric for default route
-
--   Furthermore, to configure a totally stub area, add *no-summaries* after default-metric on ABR
--   To configure a NSSA, just change *stub* to *nssa*. But on ABR, to configure default route, syntax is:
-
-<!-- -->
-
-    area 0.0.0.3 {
-    nssa {
-      default-lsa default-metric 25; <<< this will be a type-7 LSA into NSSA
-    }
-
--   Furthermore, you can have a totally stubby NSSA by using *no-summaries*. 0/0 route will become a type-3 LSA. To opt it to a type-7 LSA, you can use *type-7* under *default-lsa*.
 
 ### Type 7: The NSSA External LSA
 
