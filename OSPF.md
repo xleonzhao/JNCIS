@@ -377,11 +377,8 @@ The Link-State Database
 
 ### The Shortest Path First Algorithm
 
-In essence, it is [Dijkstra's
-algorithm](/:w:Dijkstra's_algorithm "wikilink") (see
-[animation](http://www.cs.sunysb.edu/~skiena/combinatorica/animations/dijkstra.html)).
-We only need get inputs right. In implementation, there are three
-conceptual database:
+* In essence, it is [Dijkstra's algorithm](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm) (see [animation](http://www.cs.sunysb.edu/~skiena/combinatorica/animations/dijkstra.html)).
+* We only need get inputs right. In implementation, there are three conceptual database:
 
 -   Link-state database: contains inputs (router ID, neighbor ID, cost)
 -   Cadidate database: intermediate results
