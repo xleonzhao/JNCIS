@@ -13,14 +13,16 @@ Link-State Advertisements
 
 -   LSA is carried inside an OSPF Link State Update Packet
 
-` show ospf database summary`
-` show ospf database router area 0 extensive`
-` show ospf database network area 0 extensive`
-` show ospf database netsummary area 3 extensive`
-` show ospf database area 3 lsa-id 192.168.16.2 extensive`
-` show ospf database area 3 lsa-id 192.168.16.2 extensive advertising-router 192.168.0.3`
-` show ospf database extern`
-` show ospf database nssa`
+```
+show ospf database summary
+show ospf database router area 0 extensive
+show ospf database network area 0 extensive
+show ospf database netsummary area 3 extensive
+show ospf database area 3 lsa-id 192.168.16.2 extensive
+show ospf database area 3 lsa-id 192.168.16.2 extensive advertising-router 192.168.0.3
+show ospf database extern
+show ospf database nssa
+```
 
 These commands can be further detailed by using "extensive" and specifying "area" or router via "lsa-id".
 
