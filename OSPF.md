@@ -1,9 +1,5 @@
----
-title: JNCIS Notes OSPF
-permalink: /JNCIS_Notes/OSPF/
----
-
 OSPF: Open Shortest Path First
+==============================
 
 -   <http://www.networksorcery.com/enp/rfc/rfc2328.txt>
 -   <http://www.networksorcery.com/enp/protocol/ospf.htm>
