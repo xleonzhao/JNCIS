@@ -8,7 +8,7 @@ Link-State Advertisements
 -------------------------
 
 -   LSA is carried inside an OSPF Link State Update Packet
-
+-   commands to see what's going on inside OSPF
 ```
 show ospf database summary
 show ospf database router area 0 extensive
@@ -20,7 +20,7 @@ show ospf database extern
 show ospf database nssa
 ```
 
-These commands can be further detailed by using "extensive" and specifying "area" or router via "lsa-id".
+> These commands can be further detailed by using "extensive" and specifying "area" or router via "lsa-id".
 
 ### The Common LSA Header
 
@@ -53,9 +53,9 @@ Type:
 
 -   1: **Router LSA** (node/link info)
 -   2: Network LSA
--   3: **Newtork summary LSA** (node/link info)
+-   3: **Newtork summary LSA** (node->network info, network is edge node)
 -   4: ASBR summary LSA
--   5: **AS external LSA** (node-&gt;network info)
+-   5: **AS external LSA** (node->network info)
 -   6: Group membership LSA (not supported)
 -   7: NSSA external LSA
 -   8: External attributes LSA (not supported)
@@ -63,13 +63,12 @@ Type:
 -   10: Opaque LSA (area-local scope)
 -   11: Opaque LSA (AS-wide scope) (not supported)
 
-LS Sequence Number: starting from 0x80000001, incremented to (be overflowed to) 0x7fffffff.
+> LS Sequence Number: starting from 0x80000001, incremented to (be overflowed to) 0x7fffffff.
 
 ### Type 1: The Router LSA
 
 -   Area scope
--   forms the basic inputs to SPF algorithm. router (node) and link info
-    are here.
+-   forms the basic inputs to SPF algorithm. router (node) and link info are here, so _G=<E,V>_ can be constructed.
 
 <!-- -->
 
@@ -102,16 +101,12 @@ LS Sequence Number: starting from 0x80000001, incremented to (be overflowed to) 
 
 Type:
 
--   Point-to-Point: sonet etc. *Link ID*=adjacent peer IP address; *Link
-    Data*=local interface address
--   Transit: Ethernet. *Link ID*=DR's interface address; *Link
-    Data*=local interface address
--   Stub: Loopback address, or interface in passive mode. *Link
-    ID*=address; *Link Data*=mask.
--   Virtual Link: logical connection between two ABRs. *Link ID*=peer
-    address; *Link Data*=local interface to remote ABR.
+-   Point-to-Point: sonet etc. *Link ID*=adjacent peer IP address; *Link Data*=local interface address
+-   Transit: Ethernet. *Link ID*=DR's interface address; *Link Data*=local interface address
+-   Stub: Loopback address, or interface in passive mode. *Link ID*=address; *Link Data*=mask.
+-   Virtual Link: logical connection between two ABRs. *Link ID*=peer address; *Link Data*=local interface to remote ABR.
 
-metric: cost of the link, one of the most important piece of information.
+**metric**: cost of the link, one of the most important piece of information.
 
 <!-- -->
 
@@ -126,8 +121,7 @@ metric: cost of the link, one of the most important piece of information.
 ### Type 2: The Network LSA
 
 -   Area scope
--   Ethernet DR originates this LSA to list all OSPF routers attached to
-    the same LAN segment.
+-   Ethernet DR originates this LSA to list all OSPF routers attached to the same LAN segment.
 
 <!-- -->
 
@@ -148,12 +142,8 @@ metric: cost of the link, one of the most important piece of information.
 
 ### Type 3: The Network Summary LSA
 
--   Area scope. If crossing area boundary, LSA will be re-generated
-    instead of flooding.
--   Link State ID in LSA common header is the network being
-    summaried/advertised. It says that a network (identified by *"Link
-    State ID"*) can be reached via *"Advertising Router"* by the cost of
-    *"metric"*.
+-   Area scope. If crossing area boundary, LSA will be re-generated instead of relaying.
+-   Link State ID in LSA common header is the network being summaried/advertised. It says that a network (identified by *"Link State ID"*) can be reached via *"Advertising Router"* by the cost of *"metric"*.
 
 <!-- -->
 
@@ -168,7 +158,7 @@ metric: cost of the link, one of the most important piece of information.
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
            |                  ...                  |
 
-metric: default metric for almost all interface type is 1. For aggregated routes, the metric is the largest among contributing routes.
+> metric: default metric for almost all interface type is 1. For aggregated routes, the metric is the largest among contributing routes.
 
 <!-- -->
 
@@ -180,19 +170,15 @@ metric: default metric for almost all interface type is 1. For aggregated routes
 ### Type 4: The ASBR Summary LSA
 
 -   Area scope, just tell who is ASBR.
--   a router generates and relays a type 4 LSA from one area to another
-    area when it
-    -   received a type 4 LSA from backbone area, which means there
-        is/are ASBR in other non-backbone areas
-    -   received a type 1 LSA / router LSA from its own area with E bit
-        set
+-   a router generates and relays a type 4 LSA from one area to another area when it
+    -   received a type 4 LSA from backbone area, which means there is/are ASBR in other non-backbone areas
+    -   received a type 1 LSA / router LSA from its own area with E bit set
 -   Link State ID will be ASBR address
 
 same packet format as Type 3, but with
 
 -   Network Mask is constant 0
--   only metric has a meaning (distance to ASBR), others are not
-    supported.
+-   only metric has a meaning (distance to ASBR), others are not supported.
 
 <!-- -->
 
@@ -203,8 +189,7 @@ same packet format as Type 3, but with
 
 ### Type 5: The AS External LSA
 
--   Domain scope. Flooding without re-generating, everyone has same
-    copy.
+-   Domain scope. Flooding without re-generating, everyone has same copy.
 -   Link State ID: network being advertised in this LSA
 
 <!-- -->
@@ -232,10 +217,9 @@ same packet format as Type 3, but with
     -   if E=1 (default): use *metric* as total cost (type 2)
     -   if E=0: use *metric* plus cost to ASBR as total cost (type 1)
 -   Forwarding address: address toward which packets should be forwarded
-    (like *[Protocol Next Hop](/Protocol_Next_Hop "wikilink")* for BGP
-    routes). Default of 0.0.0.0 means ASBR itself.
--   External Route Tag: OSPF is not using it, other routing protocol may
-    use it. default is 0.0.0.0
+    - somewhat like *"Protocol Next Hop"* for BGP
+    - Default of 0.0.0.0 means ASBR itself.
+-   External Route Tag: OSPF is not using it, other routing protocol may use it. default is 0.0.0.0
 -   TOS / TOS metric: optional
 
 <!-- -->
@@ -245,19 +229,18 @@ same packet format as Type 3, but with
     mask 255.255.255.0
     Type 2, TOS 0x0, metric 0, fwd addr 0.0.0.0, tag 0.0.0.0
 
-ASBR 192.168.0.1 advertised an external route 172.16.1.0/24 with total
-cost = 0
+> It says "ASBR 192.168.0.1 advertised an external route 172.16.1.0/24 with total cost = 0"
 
 ### Stub Area and its Variants
 
 -   The purpose is to reduce the database size.
 -   Commonly combined with a default route.
--   Inform ABR to stop generating/injecting certain type LSA into this
-    area.
+-   Inform ABR to stop generating/injecting certain type LSA into this area.
 
-Stub Area: no AS external LSA (type 5) and ASBR summary LSA (type 4) in this area, i.e., only type 1,2,3 allowed in this area.
-Totally Stub Area: No AS summary LSA (type 3) in this area, i.e., only type 1,2 allowed in this area.
-Not-So-Stubby Area (NSSA): allow AS external LSA (in type 7 format which then be translated to type 5) be sent out of this area, but still not into this area (still a stub), i.e., only type 1,2,7 allowed in this area.
+**Type**
+* Stub Area: no AS external LSA (type 5) and ASBR summary LSA (type 4) in this area, i.e., only type 1,2,3 allowed in this area.
+* Totally Stub Area: No AS summary LSA (type 3) in this area, i.e., only type 1,2 allowed in this area.
+* Not-So-Stubby Area (NSSA): allow AS external LSA (in type 7 format which then be translated to type 5) be sent out of this area, but still not into this area (still a stub), i.e., only type 1,2,7 allowed in this area.
 
 **Configuration**
 
@@ -269,17 +252,14 @@ For *all* routers in the stub area
     area 0.0.0.5 {
       stub
 
-For ABR which connects stub area and backbone area, it needs to provide
-default route (0/0)
+For ABR which connects stub area and backbone area, it needs to provide default route (0/0)
 
     [edit protocol ospf]
     area 0.0.0.5 {
       stub default-metric 20 <<< metric for default route
 
--   Furthermore, to configure a totally stub area, add *no-summaries*
-    after default-metric on ABR
--   To configure a NSSA, just change *stub* to *nssa*. But on ABR, to
-    configure default route, syntax is:
+-   Furthermore, to configure a totally stub area, add *no-summaries* after default-metric on ABR
+-   To configure a NSSA, just change *stub* to *nssa*. But on ABR, to configure default route, syntax is:
 
 <!-- -->
 
@@ -288,9 +268,7 @@ default route (0/0)
       default-lsa default-metric 25; <<< this will be a type-7 LSA into NSSA
     }
 
--   Furthermore, you can have a totally stubby NSSA by using
-    *no-summaries*. 0/0 route will become a type-3 LSA. To opt it to a
-    type-7 LSA, you can use *type-7* under *default-lsa*.
+-   Furthermore, you can have a totally stubby NSSA by using *no-summaries*. 0/0 route will become a type-3 LSA. To opt it to a type-7 LSA, you can use *type-7* under *default-lsa*.
 
 ### Type 7: The NSSA External LSA
 
@@ -331,12 +309,8 @@ After translation:
 
 -   Opaque LSA
 -   Area-local scope
--   Link-State ID: 8 bits opaque type (constant 1) and 8 bits reserved
-    and 16 bits Instance. The Instance field is used by the local router
-    to support multiple, separate LSAs. By default, the JUNOS software
-    generates one LSA for the router itself as well as a separate LSA
-    for each operational interface. From
-    [1](http://www.ietf.org/rfc/rfc3630.txt),
+-   Link-State ID: 8 bits opaque type (constant 1) and 8 bits reserved and 16 bits Instance. The Instance field is used by the local router to support multiple, separate LSAs. 
+    - By default, the JUNOS software generates one LSA for the router itself as well as a separate LSA for each operational interface. From [1](http://www.ietf.org/rfc/rfc3630.txt),
 
 `  The Instance field is an arbitrary value used to maintain multiple`
 `  Traffic Engineering LSAs.  A maximum of 16777216 Traffic Engineering`
@@ -346,17 +320,14 @@ After translation:
 -   An LSA contains one top-level TLV, either a router address TLV, or a
     link TLV. And link TLV includes multiple sub-TLVs, which are defined
     as:
-    -   Type 1 - Link type (1 octet). V=1: Point-to-point, V=2:
-        Multi-access
+    -   Type 1 - Link type (1 octet). V=1: Point-to-point, V=2: Multi-access
     -   Type 2 - Link ID (4 octets)
     -   Type 3 - Local interface IP address (4 octets)
     -   Type 4 - Remote interface IP address (4 octets)
     -   Type 5 - Traffic engineering metric (4 octets)
     -   Type 6 - Maximum bandwidth (4 octets)
     -   Type 7 - Maximum reservable bandwidth (4 octets)
-    -   Type 8 - Unreserved bandwidth (32 octets). Starting from
-        priority 1 to priority 7. Each priority takes 4 octets, in unit
-        of bytes/sec.
+    -   Type 8 - Unreserved bandwidth (32 octets). Starting from priority 1 to priority 7. Each priority takes 4 octets, in unit of bytes/sec.
     -   Type 9 - Administrative group (4 octets)
 
 <!-- -->
