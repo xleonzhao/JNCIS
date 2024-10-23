@@ -313,6 +313,7 @@ regular router: listen Cisco-RP-Discovery message and install RP-group mapping.
     with highest priority wins. If tie, highest IP address wins.
 -   BSR message format:
 
+```
 `    0                   1                   2                   3`
 `    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1`
 `   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+`
@@ -366,6 +367,7 @@ regular router: listen Cisco-RP-Discovery message and install RP-group mapping.
 `   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+`
 `   |          RPm-Holdtime         | RPm-Priority  |   Reserved    |`
 `   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+`
+```
 
 Fragment Tag: Bootstrap message is divided up into \`semantic fragments', if the original message exceeds the maximum packet size boundaries. Fragment Tag is a randomly generated number, acts to distinguish the fragments belonging to different Bootstrap messages; fragments belonging to same Bootstrap message carry the same \`Fragment Tag'.
 Hash Mask len: The length (in bits) of the mask to use in the hash function. For IPv4 we recommend a value of 30. For IPv6 we recommend a value of 126.
@@ -373,6 +375,7 @@ RP count: Total number of RPs for this group.
 Fragment RP Count: When a bootstrap message is fragmented, this field displays the total of RP addresses present in this fragment for the advertised group address range.
 Encoded Unicast Address: there is an **error** in above format since it takes 6 octets. The format is:
 
+```
 ` 0                   1                   2                   3`
 ` 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1`
 `+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+`
@@ -380,12 +383,14 @@ Encoded Unicast Address: there is an **error** in above format since it takes 6 
 `+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+`
 `| Unicast Address (cont'd)      |`
 `+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+`
+```
 
 -   Addr Family: 1=IP
 -   Encoding Type: 0=native encoding (default value).
 
 Encoded Group Address; it takes 8 octets. The format is:
 
+```
 ` 0                   1                   2                   3`
 ` 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1`
 `+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+`
@@ -393,6 +398,7 @@ Encoded Group Address; it takes 8 octets. The format is:
 `+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+`
 `|                Group multicast Address                        |`
 `+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+`
+```
 
 -   each router with a local RP configuration sends a Candidate-RP
     Advertisement (C-RP-Adv) message unicast to BSR.
@@ -403,6 +409,7 @@ Encoded Group Address; it takes 8 octets. The format is:
         group. JUNOS randomly pick one RP for that group.
     -   C-RP-Adv message format
 
+```
 `    0                   1                   2                   3`
 `    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1`
 `   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+`
@@ -420,6 +427,7 @@ Encoded Group Address; it takes 8 octets. The format is:
 `   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+`
 `   |                         Encoded-Group Address-n               |`
 `   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+`
+```
 
 Priority: Lowest wins
 Holdtime: The amount of time the advertisement is valid. This field allows advertisements to be aged out. C-RP will periodically resend its C-RP-Adv message before Holdtime expires.
@@ -596,6 +604,7 @@ inet.2). How? ISIS multicast TLVs and MBGP have sth to do that.
 
 ### Install local routes
 
+```
 `user@Chianti> show configuration routing-options`
 `interface-routes {`
 `  rib-group inet populate-inet2;`
@@ -605,9 +614,11 @@ inet.2). How? ISIS multicast TLVs and MBGP have sth to do that.
 `    import-rib [ inet.0 inet.2 ];`
 `  }`
 `}`
+```
 
 ### Install static routes
 
+```
 `user@Zinfandel> show configuration routing-options`
 `static {`
 `  rib-group populate-inet2;`
@@ -618,11 +629,14 @@ inet.2). How? ISIS multicast TLVs and MBGP have sth to do that.
 `    import-rib [ inet.0 inet.2 ];`
 `  }`
 `}`
+```
 
 ### Install OSPF routes
 
+```
 `user@Chardonnay> show configuration protocols ospf`
 `rib-group populate-inet2;`
+```
 
 ### Install ISIS routes
 
@@ -630,6 +644,7 @@ Two methods, one is use rib-group same as OSPF, the other is to use
 multi-topology TLVs, and this one we can alter multicast forwarding
 path.
 
+```
 `user@Merlot> show configuration protocols isis`
 `multicast-topology;`
 `level 1 disable;`
@@ -648,9 +663,11 @@ path.
 `  Multicast IP prefix: 192.168.16.1/32 metric 0 up`
 `  Multicast IP prefix: 10.222.29.0/24 metric 5 up`
 `  Multicast IP prefix: 10.222.28.0/24 metric 10 up`
+```
 
 ### Install BGP routes
 
+```
 `user@Chablis> show configuration policy-options | find alter-inet2-localpref`
 `policy-statement alter-inet2-localpref {`
 `  term set-to-200 {`
@@ -683,11 +700,13 @@ path.
 `1.1.1.0/24   *[BGP/170] 00:07:58, MED 0, localpref 200, from 192.168.52.1`
 `                AS path: 65000 I`
 `              > via so-0/1/2.0`
+```
 
 ### Using an Alternate RPF Table
 
 Inform PIM/MSDP to use inet.2
 
+```
 `user@Cabernet> show configuration routing-options use-inet2-for-rpf `
 `import-rib inet.2;`
 
@@ -699,6 +718,7 @@ Inform PIM/MSDP to use inet.2
 
 `user@Cabernet> show multicast rpf inet summary`
 `Multicast RPF table: inet.2, 20 entries`
+```
 
 ### IGMP
 
