@@ -3,6 +3,25 @@ title: JNCIS Notes VPN
 permalink: /JNCIS_Notes/VPN/
 ---
 
+- [VPN Basics](#vpn-basics)
+- [Layer 3 VPNs](#layer-3-vpns)
+  - [VPN Network Layer Reachability Information](#vpn-network-layer-reachability-information)
+  - [Basic Operational Concepts](#basic-operational-concepts)
+    - [Control plane (routes advertisement)](#control-plane-routes-advertisement)
+    - [Forwarding plane (packet forwarding)](#forwarding-plane-packet-forwarding)
+  - [Using BGP for PE-CE Route Advertisements](#using-bgp-for-pe-ce-route-advertisements)
+  - [Using OSPF for PE-CE Route Advertisements](#using-ospf-for-pe-ce-route-advertisements)
+  - [Internet Access for VPN Customers](#internet-access-for-vpn-customers)
+    - [Independent Internet Access](#independent-internet-access)
+    - [Distributed Internet Access](#distributed-internet-access)
+    - [Centralized Internet Access](#centralized-internet-access)
+- [Transporting Layer 2 Frames across a Provider Network](#transporting-layer-2-frames-across-a-provider-network)
+  - [Layer 2 VPN](#layer-2-vpn)
+    - [MBGP l2vpn NLRI](#mbgp-l2vpn-nlri)
+  - [Layer 2 Circuit](#layer-2-circuit)
+    - [LDP extension](#ldp-extension)
+- [Check List](#check-list)
+
 VPN Basics
 ----------
 

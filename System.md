@@ -3,6 +3,12 @@ title: JNCIS Notes System
 permalink: /JNCIS_Notes/System/
 ---
 
+- [Misc](#misc)
+- [Login](#login)
+- [Service](#service)
+- [Syslog](#syslog)
+- [Chassis](#chassis)
+
 Misc
 ----
 

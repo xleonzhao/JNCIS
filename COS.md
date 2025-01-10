@@ -3,6 +3,29 @@ title: JNCIS Notes COS
 permalink: /JNCIS_Notes/COS/
 ---
 
+- [Class of Service Overview](#class-of-service-overview)
+- [Terminology](#terminology)
+- [Classifying the Packets](#classifying-the-packets)
+  - [IPv4](#ipv4)
+  - [MPLS](#mpls)
+- [JUNOS Software Implementation](#junos-software-implementation)
+  - [Packet Flow](#packet-flow)
+  - [CoS Association](#cos-association)
+    - [Incoming I/O Manager ASIC](#incoming-io-manager-asic)
+    - [Internet Processor ASIC](#internet-processor-asic)
+    - [Outgoing I/O Manager ASIC](#outgoing-io-manager-asic)
+  - [CoS Configuration](#cos-configuration)
+    - [Define Code Points](#define-code-points)
+    - [Forwarding Classes](#forwarding-classes)
+    - [Behavior Aggregate Classifier](#behavior-aggregate-classifier)
+    - [Multi-Field Classifiers](#multi-field-classifiers)
+    - [Drop Profile](#drop-profile)
+    - [Scheduler](#scheduler)
+    - [scheduler-map](#scheduler-map)
+    - [Queue Servicing](#queue-servicing)
+    - [Rewrite Rules](#rewrite-rules)
+- [Check List](#check-list)
+
 Class of Service Overview
 -------------------------
 

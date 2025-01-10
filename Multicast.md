@@ -3,6 +3,32 @@ title: JNCIS Notes Multicast
 permalink: /JNCIS_Notes/Multicast/
 ---
 
+- [Multicast Overview](#multicast-overview)
+  - [Multicast Address](#multicast-address)
+  - [Multicast protocols](#multicast-protocols)
+  - [Reverse Path Forwarding (RPF)](#reverse-path-forwarding-rpf)
+  - [PIM Rendezvous Points (RP)](#pim-rendezvous-points-rp)
+  - [Multicast Operation Theory](#multicast-operation-theory)
+- [PIM RP](#pim-rp)
+  - [Static Configuration](#static-configuration)
+  - [Auto-RP](#auto-rp)
+  - [Bootstrap Routing](#bootstrap-routing)
+- [The Multicast Source Discovery Protocol](#the-multicast-source-discovery-protocol)
+  - [Operational Theory](#operational-theory)
+  - [Mesh Groups](#mesh-groups)
+  - [Anycast RP](#anycast-rp)
+- [Reverse Path Forwarding](#reverse-path-forwarding)
+  - [Creating a New RPF Table](#creating-a-new-rpf-table)
+  - [Install local routes](#install-local-routes)
+  - [Install static routes](#install-static-routes)
+  - [Install OSPF routes](#install-ospf-routes)
+  - [Install ISIS routes](#install-isis-routes)
+  - [Install BGP routes](#install-bgp-routes)
+  - [Using an Alternate RPF Table](#using-an-alternate-rpf-table)
+  - [IGMP](#igmp)
+- [Summary](#summary)
+- [Check List](#check-list)
+
 Multicast Overview
 ------------------
 

@@ -3,6 +3,28 @@ title: JNCIS Notes MPLS
 permalink: /JNCIS_Notes/MPLS/
 ---
 
+- [MPLS Intro.](#mpls-intro)
+- [RSVP vs LDP](#rsvp-vs-ldp)
+  - [LDP Tunneling](#ldp-tunneling)
+- [Constrained Shortest Path First](#constrained-shortest-path-first)
+  - [Populate information into TED](#populate-information-into-ted)
+  - [CSPF Algorithm Steps](#cspf-algorithm-steps)
+  - [Administrative Groups](#administrative-groups)
+  - [LSP priority and preemption](#lsp-priority-and-preemption)
+- [LSP Traffic Protection](#lsp-traffic-protection)
+  - [Primary LSP Paths](#primary-lsp-paths)
+  - [Secondary LSP Paths](#secondary-lsp-paths)
+    - [Standby secondary path](#standby-secondary-path)
+    - [Adaptive Mode](#adaptive-mode)
+  - [Fast Reroute](#fast-reroute)
+    - [Node Protection](#node-protection)
+    - [Link Protection](#link-protection)
+- [Controlling LSP Behavior](#controlling-lsp-behavior)
+  - [Explicit Null Advertisements](#explicit-null-advertisements)
+  - [Controlling Time-to-Live](#controlling-time-to-live)
+  - [LSP and Routing Protocol Interactions](#lsp-and-routing-protocol-interactions)
+- [Check List](#check-list)
+
 MPLS Intro.
 -----------
 
