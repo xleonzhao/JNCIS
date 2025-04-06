@@ -47,8 +47,8 @@ Terms
 
 **Stub area types**
 
-> decide how much a router in stub area should know
-> Inform ABR to stop generating/injecting certain type LSA into this area.
+> * decide how much a router in stub area should know
+> * Inform ABR to stop generating/injecting certain type LSA into this area.
 * Stub Area: no AS external LSA (type 5) and ASBR summary LSA (type 4) in this area, i.e., only type 1,2,3 allowed in this area.
 * Totally Stub Area: No AS summary LSA (type 3) in this area, i.e., only type 1,2 allowed in this area.
 * Not-So-Stubby Area (NSSA): allow AS external LSA (in type 7 format which then be translated to type 5) be sent out of this area, but still not into this area (still a stub), i.e., only type 1,2,7 allowed in this area.
@@ -405,11 +405,8 @@ The Link-State Database
 
 ### The Shortest Path First Algorithm
 
-In essence, it is [Dijkstra's
-algorithm](/:w:Dijkstra's_algorithm "wikilink") (see
-[animation](http://www.cs.sunysb.edu/~skiena/combinatorica/animations/dijkstra.html)).
-We only need get inputs right. In implementation, there are three
-conceptual database:
+* In essence, it is [Dijkstra's algorithm](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm) (see [animation](http://www.cs.sunysb.edu/~skiena/combinatorica/animations/dijkstra.html)).
+* We only need get inputs right. In implementation, there are three conceptual database:
 
 -   Link-state database: contains inputs (router ID, neighbor ID, cost)
 -   Cadidate database: intermediate results
