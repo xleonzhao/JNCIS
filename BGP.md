@@ -28,7 +28,7 @@
   - [Route Damping](#route-damping)
 - [Modifying BGP Attributes](#modifying-bgp-attributes)
   - [Local Preference](#local-preference-1)
-  - [Multiple Exit Discriminator](#multiple-exit-discriminator-1)
+  - [MED](#med)
   - [AS Path](#as-path-1)
     - [remove-private](#remove-private)
     - [local-as](#local-as)
@@ -38,6 +38,7 @@
     - [prepend other's ASN](#prepend-others-asn)
   - [Origin](#origin-1)
 - [IBGP Scaling Methods](#ibgp-scaling-methods)
+  - [Full-mesh requirement](#full-mesh-requirement)
   - [Route Reflection](#route-reflection)
     - [Operational Theory](#operational-theory)
     - [Hierarchical RR network](#hierarchical-rr-network)
@@ -65,6 +66,7 @@
 
 ## BGP Message Header
 
+```
            0                   1                   2                   3
            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -78,6 +80,7 @@
           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
           |          Length               |      Type     |
           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+```
 
 -   Mark is used for authentication
 -   Type
@@ -88,6 +91,7 @@
 
 ## BGP OPEN message format
 
+```
            0                   1                   2                   3
            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
            +-+-+-+-+-+-+-+-+
@@ -105,23 +109,25 @@
            |                       Optional Parameters                     |
            |                                                               |
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+```
 
-    Parameters:
+* Parameters:
 
+```
               0                   1
               0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5
              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-...
              |  Parm. Type   | Parm. Length  |  Parameter Value (variable)
              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-...
+```
 
-**Hold Time**: The hold-time value is advertised in open packets and indicates to the peer the length of time that it should consider the sender valid. If the peer does not receive a keepalive, update, or notification message within the specified hold time, the BGP connection to the peer is closed and routers through that peer become unavailable.
-
-* The hold time is three times the interval at which keepalive messages are sent.
-
-* The default hold time is 90 seconds.
+- **Hold Time**: The hold-time value is advertised in open packets and indicates to the peer the length of time that it should consider the sender valid. If the peer does not receive a keepalive, update, or notification message within the specified hold time, the BGP connection to the peer is closed and routers through that peer become unavailable.
+  - The hold time is three times the interval at which keepalive messages are sent.
+  - The default hold time is 90 seconds.
 
 ## BGP Update message format
 
+```
           +-----------------------------------------------------+
           |   Unfeasible Routes Length (2 octets)               |
           +-----------------------------------------------------+
@@ -133,6 +139,7 @@
           +-----------------------------------------------------+
           |   Network Layer Reachability Information (variable) |
           +-----------------------------------------------------+
+```
 
 ### BGP Path Attributes
 
@@ -157,12 +164,10 @@
   ```  
 
 * Path attributes fall into four separate categories:
-
- 1. Well-known mandatory.
- 2. Well-known discretionary.
- 3. Optional transitive.
- 4. Optional non-transitive.
-
+  1. Well-known mandatory.
+  2. Well-known discretionary.
+  3. Optional transitive.
+  4. Optional non-transitive.
 * Well-known attributes must be recognized by all BGP implementations. Some of these attributes are mandatory and must be included in every UPDATE message. Others are discretionary and may or may not be sent in a particular UPDATE message.
   * well-known attribute are always transitive.
 * if a router doesn't understand a transitive attribute, it should forward the attribute without touching it. But if a router understands, it can change it, like community attribute.
@@ -223,8 +228,7 @@
 -   never advertised to an EBGP peer.
 -   default value is 100.
 -   V=
-    -   (4 octets): higher, better. (This is the only step in the
-        algorithm that prefers a higher value over a lower value.)
+    -   (4 octets): higher, better. (This is the only step in the algorithm that prefers a higher value over a lower value.)
 
 #### Atomic Aggregate
 
@@ -312,8 +316,7 @@
     -   (2/4-octets) Administrator value. AS number or IP address.
     -   (4/2-octets) Assigned number.
 
-BGP Path Selection
-------------------
+## BGP Path Selection
 
 1.  Check next hop reachability.
 2.  Local Preference. Highest wins.
@@ -341,16 +344,14 @@ BGP Path Selection
     skipped, all eligible next hop(s), up to 16 next hops, will be used
     to forward traffic.
 
-Configuration Options
----------------------
+## Configuration Options
 
 ### Multihop BGP
 
 -   By protocol restriction, EBGP session is setup between two directly connected routers. So by default, BGP is using interface address. When interface went down, BGP will immediately tear the session. In the event of interface flap, BGP will flap. Using lo0 address for BGP session can prevent such flap.
 -   when using lo0 for BGP session, we need multihop.
 
-<!-- -->
-
+```
     group external-peers {
       type external;
       multihop;
@@ -358,6 +359,7 @@ Configuration Options
       local-address 192.168.40.1; <<< this is needed as well.
       neighbor 192.168.32.1;
     }
+```
 
 ### BGP Load Balancing
 
@@ -369,8 +371,7 @@ Configuration Options
 -   When one peer restarts (tcp may reset), the other peer keeps forwarding traffic to the restarting peer. If the other peer detects restart event (eg via detection of tcp reset), it will mark all routes received from restarting peer as stale. (but it doesn't affect traffic forwarding.)
 -   once the restarting peer returns to service, it informs the peer via an OPEN message
 
-<!-- -->
-
+```
     11:00:44.643978 In IP (tos 0xc0, ttl 64, id 37564, len 107)
       192.168.24.1.bgp > 192.168.36.1.3760: P 1:56(55) ack 56 win 16445
       <nop,nop,timestamp 50721382 50710953>: BGP, length: 55
@@ -384,8 +385,10 @@ Configuration Options
               Graceful Restart, length: 6
               Restart Flags: [R], Restart Time 120s
               AFI IPv4 (1), SAFI Unicast (1), Forwarding state preserved: yes
+```
 
-    from internet-draft draft-ietf-idr-restart-10.txt:
+* from internet-draft draft-ietf-idr-restart-10.txt:
+```
              Restart State (R)bit which can be used to avoid possible deadlock caused by
              waiting for the End-of-RIB marker when multiple BGP speakers
              peering with each other restart. When set (value 1), this bit
@@ -399,20 +402,21 @@ Configuration Options
              for an address family in the capability can be
              set only if the forwarding state has indeed been preserved for that
              address family during the restart.
+```
 
 -   restarting peer should defer route selection until End-of-RIB marker is received from its peer (unless the peer is also restarting). And the defer is bounded by a configurable time.
 -   receiving peer should accept new OPEN message's TCP session and close previous TCP session. If forwarding state bit is not set, delete all routes previously learned from restarting peer.
 -   receiving peer sent out accumulated updates during restarting followed by a End-of-RIB marker.
 -   End-of-Marker is an empty update message.
 
-<!-- -->
-
+```
     [edit protocols bgp]
     user@Sangiovese# set graceful-restart ?
     restart-time        Restart time used when negotiating with a peer (1..600). Sent in OPEN message.
     stale-routes-time   Maximum time for which stale routes are kept (1..600). Local only. It is
                         the amount of time that the routes advertised by the restarting peer are used
                         for forwarding before being deleted.
+```
 
 ### Authentication
 
@@ -425,6 +429,7 @@ Configuration Options
 
 ### Establishing Prefix Limits
 
+```
     > show configuration protocols bgp group external-peers
     type external;
     family inet {
@@ -435,6 +440,7 @@ Configuration Options
         }
       }
     }
+```
 
 -   teardown: teardown the BGP session if maximum is exceeded.
 -   teardown 80: once receiving prefixes exceed 80% of maximum, writing a syslog warning message.
@@ -456,18 +462,19 @@ Configuration Options
     -   Half-life: default=15 minutes, range=[1, 45]. figure of metric decay exponentially to half in 15 minutes
     -   Maximum suppression time: default=60 minutes, range=[1, 720 minutes]
 
-Modifying BGP Attributes
-------------------------
+## Modifying BGP Attributes
 
 ### Local Preference
 
+```
     neighbor 192.168.24.1 {
       local-preference 50;
     }
+```
 
 -   The important thing is to ensures that all routers in the network make consistent routing decisions. This can be done via "the Local Preference attribute is assigned to all received EBGP routes using an inbound routing policy."
 
-### Multiple Exit Discriminator
+### MED
 
 `Path 1—via EBGP; AS Path of 65010; MED of 200`
 `Path 2—via IBGP; AS Path of 65020; MED of 150; IGP cost of 5`
@@ -478,9 +485,6 @@ Modifying BGP Attributes
     -   By default, JUNOS will compare path 1 and path 3 since they are from same neighboring AS (in this way MED makes more sense), then path 2. Final choice is path-2.
     -   cisco will do path-3, path-2, path-1 in sequence, which will give final result is path-1. *cisco-non-deterministic* knob will turn JUNOS to follow cisco.
     -   *always-compare-med* knob will compare MED from all neighboring ASs, not necessarily same AS, which will give final result as path-3.
-
-<!-- -->
-
 -   JUNOS allows to config MED on an individual peer, peer group, or all peers.
 
 |                        |                 |
@@ -492,14 +496,14 @@ Modifying BGP Attributes
 
 -   Policy can make finer granularity to prefix level
 
-<!-- -->
-
+```
     from {
       route-filter 172.20.0.0/16 orlonger;
     }
     then {
       metric igp;
     }
+```
 
 - [MED and IGP metric causing route oscillation](http://www.ietf.org/rfc/rfc3345.txt)
 
@@ -507,8 +511,10 @@ Modifying BGP Attributes
 
 #### remove-private
 
+```
     [edit protocols bgp group external-peers]
     remove-private;
+```
 
 -   should this be default whe you have a customer using private ASN?
 -   this is not affecting private ASN in the middle of AS path.
@@ -517,78 +523,80 @@ Modifying BGP Attributes
 
 -   When migrating one ASN to another, need peers also change their config. If some peer still use ur old ASN, "local-as" is to fool them.
 
-<!-- -->
-
+```
     [edit protocols bgp]
     user@Chardonnay# show group external-peers
     type external;
     peer-as 4444;
     local-as 1111 [private]; <<< private will remove 1111 when advertising to other peers.
     neighbor 10.222.44.1;
+```
 
 #### as-override
 
+```
     [edit protocols bgp]
     user@Merlot# show group external-peers
     type external;
     peer-as 65010;
     as-override;
     neighbor 10.222.3.1;
+```
 
 -   using its own ASN to replace peer's ASN.
 -   used when an AS is partitioned into two seperated parts and connected via another AS. In this case, two parts cannot receive routes from each other due to two parts use same ASN and AS path loop detection will see a loop.
 
 #### loop
 
+```
     user@Shiraz# show routing-options
     autonomous-system 65010 loops 2;
+```
 
 -   allow one ASN loop twice in an AS path.
 -   used in same situation as "as-override"
 
 #### prepend its own ASN
 
+```
     from protocol aggregate;
       then {
       as-path-prepend "64888 64888";
       accept;
     }
+```
 
 -   this will add 3 64888 into the AS path.
 
 #### prepend other's ASN
 
 -   customer would like its ISP to NOT use a particular external AS for major traffic.
-
-<!-- -->
-
-    Before: the particular external AS saw this:
-    * 172.16.1.0/24 B 170 100 >10.222.3.2 65010 64888 I
-
-    ISP did what its customer asked:
+- Before: the particular external AS saw this:
+`172.16.1.0/24 B 170 100 >10.222.3.2 65010 64888 I`
+- ISP did what its customer asked:
+```
     from as-path AS64888;
       then {
         as-path-expand last-as count 3;
       }
-    }
-
-    After: the particular external AS saw this:
-    * 172.16.1.0/24 Self 64888 64888 64888 64888 I
+```
+- After: the particular external AS saw this:
+`172.16.1.0/24 Self 64888 64888 64888 64888 I`
 
 ### Origin
 
 -   why someone need to do this? to affect route selection process, I guess?
-
-<!-- -->
-
+```
     from protocol static;
       then {
       origin egp;
       accept;
     }
+```
 
-IBGP Scaling Methods
---------------------
+## IBGP Scaling Methods
+
+### Full-mesh requirement
 
 -   IBGP routers have to be full meshed. Why? To prevent routing loops.
     -   BGP is using AS path to detect loop. However, inside an AS, router A sent a route to B, B sent to C, C sent back to A. Should A use this route? A has no idea because AS path has not been changed yet. And there is no any other information helping A to detect loops.
@@ -628,8 +636,7 @@ IBGP Scaling Methods
 
 -   can be any number of levels, no limit.
 
-<!-- -->
-
+```
     user@Chablis> show route 172.16.1/24 detail
     inet.0: 23 destinations, 23 routes (23 active, 0 holddown, 0 hidden)
     172.16.1.0/24 (1 entry, 1 announced)
@@ -646,6 +653,7 @@ IBGP Scaling Methods
            AS path: Originator ID: 192.168.36.1
            Localpref: 100
            Router ID: 192.168.56.1
+```
 
 Where 2.2.2.2 is the originator's cluster, 3.3.3.3 is higher level cluster including RRs for 1.1.1.1 and 2.2.2.2. Chablis is a client in cluster 1.1.1.1.
 
@@ -668,8 +676,7 @@ Where 2.2.2.2 is the originator's cluster, 3.3.3.3 is higher level cluster inclu
 `autonomous-system 64777;`
 `confederation 1111 members [ 64555 64777 ];`
 
-Using Multiprotocol BGP
------------------------
+## Using Multiprotocol BGP
 
 -   A very common application of MBGP is two IBGP peers in an AS supporting transit service, Layer 3 VPNs, and Layer 2 VPNs.
 -   Capability negotiation is kicked in at session establishing stage. Capability is a new option (option type=2) in OPEN message. Capacity option includes a type (1-octet, which is set to constant 1), and length (1-octet, which is set to constant 4), and the following.
@@ -734,8 +741,7 @@ Using Multiprotocol BGP
 `  l2vpn;`
 `}`
 
-Summary
--------
+## Summary
 
 In this chapter, we examined the operation of the Border Gateway Protocol within the JUNOS software. We first examined the BGP Update message used to advertise and withdraw routes from a peer. We followed this with a look at each of the defined BGP attributes used in today’s network environments. The format of each attribute was displayed and an explanation was supplied for each defined variable. The route attributes are instrumental in the selection of an active BGP route, so our discussion moved to the operation of the route selection algorithm. We talked about each step of the process in depth and then saw some CLI commands available to verify the operation of the selection process.
 

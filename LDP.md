@@ -1,8 +1,3 @@
----
-title: JNCIS Notes MPLS LDP
-permalink: /JNCIS_Notes/MPLS/LDP/
----
-
 - [LDP Overview](#ldp-overview)
   - [LDP common header](#ldp-common-header)
   - [LDP message](#ldp-message)
