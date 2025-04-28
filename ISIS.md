@@ -6,7 +6,7 @@ permalink: /JNCIS_Notes/ISIS/
 - [IS-IS General](#is-is-general)
   - [Addressing](#addressing)
   - [IS-IS PDU](#is-is-pdu)
-- [IS-IS TLV Details](#is-is-tlv-details)
+- [IS-IS TLVs](#is-is-tlvs)
   - [TLVs used to setup/maintain neighboring relationship](#tlvs-used-to-setupmaintain-neighboring-relationship)
     - [Area Address (TLV 1)](#area-address-tlv-1)
     - [IS Neighbors (TLV 6)](#is-neighbors-tlv-6)
@@ -41,11 +41,9 @@ permalink: /JNCIS_Notes/ISIS/
   - [Overload Bit](#overload-bit)
 - [Address Summarization](#address-summarization)
 - [Summary](#summary)
-- [Check List](#check-list)
+  - [Check List](#check-list)
 
-
-IS-IS General
--------------
+## IS-IS General
 
 * http://www.networksorcery.com/enp/protocol/is-is.htm
 
@@ -60,9 +58,10 @@ Selector: 1 byte. designed as similar to TCP port. JUNOS uses it to identify dif
 ### IS-IS PDU
 
 -   Three type ISIS PDUs
-  * http://www.rhyshaden.com/isis.htm
-  * http://www.cisco.com/en/US/products/ps6599/products_white_paper09186a00800a3e6f.shtml
+    - http://www.rhyshaden.com/isis.htm
+    - http://www.cisco.com/en/US/products/ps6599/products_white_paper09186a00800a3e6f.shtml
 -   Each type can be level 1 and level 2.
+
 ```
 PDU	Type
 Hello	 
@@ -80,6 +79,7 @@ Level 2 CSNP	  25
 Level 1 PSNP	  26
 Level 2 PSNP	  27
 ```
+
 -   **IIH**: IS-IS Hello packet. Used for setup/maintain adjacency.
     -   LAN IIH: used in broadcast segment
     -   point-to-point IIH: single type used for both levels.
@@ -90,14 +90,11 @@ Level 2 PSNP	  27
         database.
 -   PDU is carrying TLVs, which contains routing information.
 
-IS-IS TLV Details
------------------
-
+## IS-IS TLVs
 -   T: 1 octet; L: 1 octet
 -   TLV code points: http://www.iana.org/assignments/isis-tlv-codepoints
 
-<!-- -->
-
+```
     Name                                  Value  IIH   LSP  SNP   Status/Reference
     ----------------------                -----  ---   ---  ---   ----------------
     Area Addresses                            1   y     y    n    ISO 10589
@@ -123,11 +120,11 @@ IS-IS TLV Details
     IPv6 IP. Reach                          236   n     y    n    IETF-draft
     Multiple Topologies IPv6 IP. Reach      237   n     y    n    IETF-draft
     P2P 3-Way Adj. State                    240   y     n    n    [RFC3373]
+```
 
 -   An example:
 
-<!-- -->
-
+```
     user@Shiraz> show isis database extensive | find TLV
     TLVs:
       Area address: 49.0001 (3)                                          <-- TLV 1   = Area address
@@ -146,6 +143,7 @@ IS-IS TLV Details
       IP extended prefix: 192.168.20.0/24 metric 10 up                   <-- TLV 135 = ..
       IP external prefix: 172.16.3.0/24, Internal, Metric: default 0, Up <-- TLV 130 = IP external reachability
       Authentication data: 17 bytes                                      <-- TLV 10  = Authentication
+```
 
 ### TLVs used to setup/maintain neighboring relationship
 
@@ -387,8 +385,7 @@ This above output says "I am steady".
 `  lsp-id: 1921.6800.2002.00-00, seq: 0x000000d8,`
 `    lifetime: 1192s, chksum: 0x7961`
 
-IS-IS Areas and Levels
-----------------------
+## IS-IS Areas and Levels
 
 -   Area is identified by area ID in ISIS address. Area controls neighborhood formation.
     -   L1 router only neighbors with L1 routers configured with same area ID.
@@ -401,8 +398,7 @@ IS-IS Areas and Levels
 
 -   Each router has its own LSP.
 
-<!-- -->
-
+```
     user@Shiraz> show isis database Shiraz.00-00 detail
     IS-IS level 1 link-state database:
 
@@ -412,16 +408,17 @@ IS-IS Areas and Levels
       IP prefix: 192.168.16.1/32 Metric: 0 Internal Up   <<< Shiraz's lo0 address in its own routing table
       IP prefix: 192.168.17.0/24 Metric: 10 Internal Up
       IP prefix: 192.168.18.0/24 Metric: 10 Internal Up
+```
 
 -   The LSP-ID, Shiraz.00-00, can be broken down into three sections:
     -   Shiraz = system ID
     -   00 = non-zero value for the pseudonode.
-    -   00 = fragment number. In this case, we only have fragment numbers of 00, which indicates that all the data fit into this LSP fragment, and there was no need to create more fragments. If there had been information that did not fit into the first LSP, IS-IS would have created more LSP fragments, such as 01, 02, and so on.
+    -   00 = fragment number. 
+-   In this case, we only have fragment numbers of 00, which indicates that all the data fit into this LSP fragment, and there was no need to create more fragments. If there had been information that did not fit into the first LSP, IS-IS would have created more LSP fragments, such as 01, 02, and so on.
 -   A Level 1 LSP is flooded within its own Level 1 area. Every router in same area does SPF calculation to reach every other router and every prefix attached to other routers.
 -   Each L1/L2 border router announces its local Level 1 routes in its Level 2 LSP to the backbone. This allows all Level 2 routers to have explicit routing knowledge of all routes in the network.
 
-<!-- -->
-
+```
     user@Merlot> show isis database Shiraz.00-00 detail
     IS-IS level 1 link-state database:
 
@@ -431,9 +428,11 @@ IS-IS Areas and Levels
       IP prefix: 192.168.16.1/32 Metric: 0 Internal Up  <<< Shiraz's lo0 address in Merlot's L1 database.
       IP prefix: 192.168.17.0/24 Metric: 10 Internal Up
       IP prefix: 192.168.18.0/24 Metric: 10 Internal Up
+```
 
-    IS-IS level 2 link-state database:
+-   IS-IS level 2 link-state database:
 
+```
     Merlot.00-00 Sequence: 0x59, Checksum: 0x111c, Lifetime: 829 secs
       IS neighbor: Merlot.02 Metric: 10
       IP prefix: 192.168.0.1/32 Metric: 0 Internal Up
@@ -443,16 +442,17 @@ IS-IS Areas and Levels
                                                              which will be flooded into L2 area.
       IP prefix: 192.168.17.0/24 Metric: 10 Internal Up
       IP prefix: 192.168.18.0/24 Metric: 20 Internal Up
+```
 
 -   Each Level 1 router uses L1/L2 border router as default router. L1/L2 is identified by Attached bit = 1. If multiple L1/L2 border router exist, level 1 router chose the closet one in terms of metric.
 
-<!-- -->
-
+```
     user@Riesling> show isis database level 1
     IS-IS level 1 link-state database:
     LSP ID         Sequence Checksum Lifetime Attributes
     Riesling.00-00 0x55     0xb1f1   609      L1 L2 Attached <<< Attached bit is set.
     Cabernet.00-00 0x56     0xda17   809      L1 L2 Attached
+```
 
 -   Level 1 *external* routes will not be advertised into level 2 area. Using *wide-metrics-only* is a workaround since wide metrcs is carried by TLV 135, which doesn't differentiate *internal* routes and *external* routes. Or use policy similar to Route leakage below but in the opposite direction.
 
@@ -461,8 +461,7 @@ IS-IS Areas and Levels
 -   By default, level 2 routes are not injected into level 1 area.
 -   To change the default behavior, using policies:
 
-<!-- -->
-
+```
     term level-2-routes {
       from {
         protocol isis;
@@ -471,16 +470,15 @@ IS-IS Areas and Levels
       to level 1;
       then accept;
     }
+```
 
-Link-State Database
--------------------
+## Link-State Database
 
 ### Database Integrity
 
 -   The advertised LSPs in each level must be identical on each router.
 
-<!-- -->
-
+```
     JTAC@LONCR4.re0> show isis database level 2 BAGPE2.00-00 extensive
     IS-IS level 2 link-state database:
 
@@ -516,27 +514,27 @@ Link-State Database
         IS extended neighbor: BAGPE1.00, Metric: default 3
         IP extended prefix: 172.25.0.1/32 metric 0 up
       No queued transmissions
+```
 
-Configuration Options
----------------------
+## Configuration Options
 
 ### Interface Metrics
 
 -   change interface metric under `protocol isis`
 
-<!-- -->
-
+```
     interface so-0/1/0.0 {
       level 1 metric 25;
       level 2 metric 30;
     }
+```
 
 -   change reference bandwidth. Default is fast ethernet (100M) is metric 1. Formula is (reference_bandwidth/link BW), round to 1 is less than 1.
 
-<!-- -->
-
+```
     user@Shiraz> show configuration protocols isis
     reference-bandwidth 1g;
+```
 
 ### Wide Metrics
 
@@ -548,8 +546,7 @@ Configuration Options
 -   By default, flooding works in a way that re-transit LSP to all adjacent neighbors but the sender.
 -   Mesh group is configured at interface level. It specifies that LSPs received on an interface are not reflooded to any other interface on the router, which is also configured with the same mesh group value.
 
-<!-- -->
-
+```
     user@Chianti> show configuration protocols isis
     level 1 disable;
     interface so-0/1/0.600 {
@@ -561,38 +558,38 @@ Configuration Options
     interface so-0/1/1.700 {
       mesh-group 101;
     }
+```
 
 ### Graceful Restart
 
--   To avoid overhead when the IS-IS restart time is of a short
-    duration. -   Operation is similar to OSPF graceful restart.
-
-<!-- -->
-
+-   To avoid overhead when the IS-IS restart time is of a short duration. 
+-   Operation is similar to OSPF graceful restart.
 -   alerts neighbor restart event
-<!-- -->
 
+```
         Restart Signaling TLV #211, length: 3
         Restart Request bit set, Restart Acknowledgement bit clear
         Remaining holding time: 0s
+```
 
 -   if neighbor is capable to help (aka in helper mode), neighbor acknowledges the request and maintains UP state during restart.
 
-<!-- -->
+```
         Restart Signaling TLV #211, length: 3
         Restart Request bit clear, Restart Acknowledgement bit set
         Remaining holding time: 90s
+```
 
 -   if successfully restarted, ask neighbor's assistance to catch up all routing changes. Neighbor generates CSNPs to the restarting neighbor and responds to any received PSNPs with the appropriate LSP.
 -   if restart takes longer than configured time (90 seconds by default
     but configurable), neighbor declares ISIS session down.
 
-<!-- -->
+```
         [edit protocols isis]
         user@Riesling# set graceful-restart ?
           restart-duration  Maximum time for graceful restart to finish (seconds) <<< 90 sec is the default value
+```
 
-</ul>
 ### Authentication
 
 -   configured at `protocol isis` level or `protocol isis interface` level
@@ -618,22 +615,19 @@ Configuration Options
 -   often used for maintenance or leave router alone to reload BGP table after a restart.
 -   set under `protocol isis`
 
-<!-- -->
-
+```
     overload [timeout 60];
+```
 
-Address Summarization
----------------------
+## Address Summarization
 
--   done by L1/L2 router when advertising level 1 to level 2, or verse
-    visa.
+-   done by L1/L2 router when advertising level 1 to level 2, or verse visa.
 -   done with policies.
     -   first check what group of prefixes can be summarized, `show isis database`.
     -   then write a policy to reject more specific.
     -   then write an aggregate to be advertised.
 
-<!-- -->
-
+```
     [edit routing-options]
     user@Merlot# show
     aggregate {
@@ -655,16 +649,15 @@ Address Summarization
         then accept;
       }
     }
+```
 
-Summary
--------
+## Summary
 
 In this chapter, we examined the operation of the IS-IS routing protocol. We first discussed the various type, length, value (TLV) formats used to advertise information. We then explored the Shortest Path First (SPF) algorithm and saw how it calculates the path to each destination in the network. We then discussed some configuration options available within the JUNOS software for use with IS-IS. We first saw how graceful restart can help mitigate churn in a network. A look at interface metrics and authentication options followed. We then explored how a mesh group operates by reducing the flooding of LSPs. This was followed by the use of the overload bit in the network.
 
 We concluded the chapter with an exploration of how IS-IS operates in a multilevel configuration. We saw how reachability was attained for each router in the network and the default flooding rules for routes from different levels. We then discussed methods for altering the default flooding rules using routing policies to leak routes between levels. Finally, we learned how to summarize routes in an IS-IS network using locally configured aggregate routes and routing policies.
 
-Check List
-----------
+### Check List
 
 -   list ISIS PDUs and their functions
 -   list ISIS TLVs and their use
