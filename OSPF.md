@@ -1,9 +1,9 @@
 - [OSPF: Open Shortest Path First](#ospf-open-shortest-path-first)
   - [Terms](#terms)
-    - [Stub Area and its Variants](#stub-area-and-its-variants)
-  - [Link-State Advertisements](#link-state-advertisements)
-    - [The Common LSA Header](#the-common-lsa-header)
-    - [LSA Type:](#lsa-type)
+  - [Stub Area and its Variants](#stub-area-and-its-variants)
+- [Link-State Advertisements](#link-state-advertisements)
+  - [The Common LSA Header](#the-common-lsa-header)
+  - [LSA Type:](#lsa-type)
     - [Type 1: The Router LSA](#type-1-the-router-lsa)
     - [Type 2: The Network LSA](#type-2-the-network-lsa)
     - [Type 3: The Network Summary LSA](#type-3-the-network-summary-lsa)
@@ -12,28 +12,26 @@
     - [Type 7: The NSSA External LSA](#type-7-the-nssa-external-lsa)
     - [Type 9: Graceful Restart LSA](#type-9-graceful-restart-lsa)
     - [Type 10: MPLS Traffic Engineering LSA](#type-10-mpls-traffic-engineering-lsa)
-  - [The Link-State Database](#the-link-state-database)
-    - [Database Integrity](#database-integrity)
-    - [The Shortest Path First Algorithm](#the-shortest-path-first-algorithm)
-  - [Configuration Options](#configuration-options)
-    - [Interface Metrics](#interface-metrics)
-    - [Authentication](#authentication)
-    - [Graceful Restart](#graceful-restart)
-    - [Virtual Links](#virtual-links)
-  - [Address Summarization](#address-summarization)
-    - [Area Route Summarization](#area-route-summarization)
-    - [NSSA Route Summarization](#nssa-route-summarization)
-  - [Summary](#summary)
+- [The Link-State Database](#the-link-state-database)
+  - [Database Integrity](#database-integrity)
+  - [The Shortest Path First Algorithm](#the-shortest-path-first-algorithm)
+- [Configuration Options](#configuration-options)
+  - [Interface Metrics](#interface-metrics)
+  - [Authentication](#authentication)
+  - [Graceful Restart](#graceful-restart)
+  - [Virtual Links](#virtual-links)
+- [Address Summarization](#address-summarization)
+  - [Area Route Summarization](#area-route-summarization)
+  - [NSSA Route Summarization](#nssa-route-summarization)
+- [Summary](#summary)
   - [Check List](#check-list)
 
-OSPF: Open Shortest Path First
-==============================
+## OSPF: Open Shortest Path First
 
 -   <http://www.networksorcery.com/enp/rfc/rfc2328.txt>
 -   <http://www.networksorcery.com/enp/protocol/ospf.htm>
 
-Terms
---------
+### Terms
 
 * AS: under single administrative control. (same as BGP AS)
 * Area: usually, an OSPF network is divided into multiple areas, with a backbone area and multiple stub areas.
@@ -57,6 +55,7 @@ Terms
 
 -   Stub area
 
+```
 For *all* routers in the stub area
 
     [edit protocol ospf]
@@ -68,24 +67,25 @@ For ABR which connects stub area and backbone area, it needs to provide default 
     [edit protocol ospf]
     area 0.0.0.5 {
       stub default-metric 20 <<< metric for default route
+```
 
 -   Furthermore, to configure a totally stub area, add *no-summaries* after default-metric on ABR
 -   To configure a NSSA, just change *stub* to *nssa*. But on ABR, to configure default route, syntax is:
 
-<!-- -->
-
+```
     area 0.0.0.3 {
     nssa {
       default-lsa default-metric 25; <<< this will be a type-7 LSA into NSSA
     }
+```
 
 -   Furthermore, you can have a totally stubby NSSA by using *no-summaries*. 0/0 route will become a type-3 LSA. To opt it to a type-7 LSA, you can use *type-7* under *default-lsa*.
 
-Link-State Advertisements
--------------------------
+## Link-State Advertisements
 
 -   LSA is carried inside an OSPF Link State Update Packet
 -   commands to see what's going on inside OSPF
+
 ```
 show ospf database summary
 show ospf database router area 0 extensive
@@ -103,8 +103,7 @@ show ospf database nssa
 
 -   20 octets
 
-<!-- -->
-
+```
             0           1           2           3
         0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -118,9 +117,10 @@ show ospf database nssa
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
            |     LS checksum           |         length        |
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+```
 
-* LS age: MaxAge is 3600 seconds by default. LSA originator will reflood its own LSA at 3000 seconds. Transit router will increment prior to reflooding.
-* Options:
+* `LS age`: MaxAge is 3600 seconds by default. LSA originator will reflood its own LSA at 3000 seconds. Transit router will increment prior to reflooding.
+* `Options`:
     -   bit 7: DN bit, if set, a router should not forward this LSA.
     -   bit 6: O bit, Sender set it if it supports Opaque LSA.
     -   bit 3: N/P bit. set if support not-so-stubby LSA
@@ -144,14 +144,13 @@ show ospf database nssa
 
 > LS Sequence Number: starting from 0x80000001, incremented to (be overflowed to) 0x7fffffff.
 
-### Type 1: The Router LSA
+#### Type 1: The Router LSA
 
 -   Area scope
 
-<!-- -->
-
-            0           1           2           3
-        0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+```
+           0                   1                   2                   3
+           0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
            |    0    |V|E|B|    0      |        # links        |
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -170,24 +169,22 @@ show ospf database nssa
            |             Link Data                 |
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
            |                  ...                  |
+```
 
-00000VEB ("web"):
+-   `00000VEB` ("web"):
+    -   V (virtual): virtual link is established
+    -   E (extern): this is an ASBR router
+    -   B (border): this is an ABR router
 
--   V (virtual): virtual link is established
--   E (extern): this is an ASBR router
--   B (border): this is an ABR router
+- `Type`:
+  -   Point-to-Point: sonet etc. *Link ID*=adjacent peer IP address; *Link Data*=local interface address
+  -   Transit: Ethernet. *Link ID*=DR's interface address; *Link Data*=local interface address
+  -   Stub: Loopback address, or interface in passive mode. *Link ID*=address; *Link Data*=mask.
+  -   Virtual Link: logical connection between two ABRs. *Link ID*=peer address; *Link Data*=local interface to remote ABR.
 
-Type:
+- **metric**: cost of the link, one of the most important piece of information.
 
--   Point-to-Point: sonet etc. *Link ID*=adjacent peer IP address; *Link Data*=local interface address
--   Transit: Ethernet. *Link ID*=DR's interface address; *Link Data*=local interface address
--   Stub: Loopback address, or interface in passive mode. *Link ID*=address; *Link Data*=mask.
--   Virtual Link: logical connection between two ABRs. *Link ID*=peer address; *Link Data*=local interface to remote ABR.
-
-**metric**: cost of the link, one of the most important piece of information.
-
-<!-- -->
-
+```
     Type   ID          Adv Rtr     Seq        Age Opt Cksum  Len
     Router 192.168.0.1 192.168.0.1 0x80000002 422 0x2 0x1c94 60
     bits 0x3, link count 3
@@ -195,16 +192,16 @@ Type:
     TOS count 0, TOS 0 metric 1
     id 192.168.1.0, data 255.255.255.0, type Stub (3)
     TOS count 0, TOS 0 metric 1
+```
 
-### Type 2: The Network LSA
+#### Type 2: The Network LSA
 
 -   Area scope
 -   Ethernet DR originates this LSA to list all OSPF routers attached to the same LAN segment.
 
-<!-- -->
-
-        0           1           2           3
-        0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+```
+           0                   1                   2                   3
+           0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
            |             Network Mask                  |
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -217,16 +214,16 @@ Type:
     mask 255.255.255.0
     attached router 192.168.0.3
     attached router 192.168.0.2
+```
 
-### Type 3: The Network Summary LSA
+#### Type 3: The Network Summary LSA
 
 -   Area scope. If crossing area boundary, LSA will be re-generated instead of relaying.
 -   Link State ID in LSA common header is the network being summaried/advertised. It says that a network (identified by *"Link State ID"*) can be reached via *"Advertising Router"* by the cost of *"metric"*.
 
-<!-- -->
-
-            0           1           2           3
-        0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+```
+           0                   1                   2                   3
+           0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
            |             Network Mask                  |
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -236,16 +233,18 @@ Type:
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
            |                  ...                  |
 
+```
+
 > metric: default metric for almost all interface type is 1. For aggregated routes, the metric is the largest among contributing routes.
 
-<!-- -->
-
+```
     Type     ID           Adv Rtr     Seq        Age Opt Cksum  Len
     Summary *192.168.49.0 192.168.0.3 0x80000001 439 0x2 0x88cc 28
     mask 255.255.255.0
     TOS 0x0, metric 1
+```
 
-### Type 4: The ASBR Summary LSA
+#### Type 4: The ASBR Summary LSA
 
 -   Area scope, just tell who is ASBR.
 -   a router generates and relays a type 4 LSA from one area to another area when it
@@ -253,27 +252,25 @@ Type:
     -   received a type 1 LSA / router LSA from its own area with E bit set
 -   Link State ID will be ASBR address
 
-same packet format as Type 3, but with
+* same packet format as Type 3, but with
+  -   Network Mask is constant 0
+  -   only metric has a meaning (distance to ASBR), others are not supported.
 
--   Network Mask is constant 0
--   only metric has a meaning (distance to ASBR), others are not supported.
-
-<!-- -->
-
+```
     Type     ID           Adv Rtr     Seq        Age Opt Cksum  Len
     ASBRSum *192.168.48.1 192.168.0.3 0x80000001 18  0x2 0x7bd8 28
     mask 0.0.0.0
     TOS 0x0, metric 1
+```
 
-### Type 5: The AS External LSA
+#### Type 5: The AS External LSA
 
 -   Domain scope. Flooding without re-generating, everyone has same copy.
 -   Link State ID: network being advertised in this LSA
 
-<!-- -->
-
-            0                   1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+```
+           0                   1                   2                   3
+           0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
            |                         Network Mask                          |
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -290,26 +287,27 @@ same packet format as Type 3, but with
            |                      External Route Tag                       |
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
            |                              ...                              |
+```
 
--   E bit followed by 7 0s
+-   `E` bit followed by 7 0s
     -   if E=1 (default): use *metric* as total cost (type 2)
     -   if E=0: use *metric* plus cost to ASBR as total cost (type 1)
--   Forwarding address: address toward which packets should be forwarded
+-   `Forwarding address`: address toward which packets should be forwarded
     - somewhat like *"Protocol Next Hop"* for BGP
     - Default of 0.0.0.0 means ASBR itself.
--   External Route Tag: OSPF is not using it, other routing protocol may use it. default is 0.0.0.0
--   TOS / TOS metric: optional
+-   `External Route Tag`: OSPF is not using it, other routing protocol may use it. default is 0.0.0.0
+-   `TOS / TOS metric`: optional
 
-<!-- -->
-
+```
     Type   ID         Adv Rtr     Seq        Age  Opt Cksum  Len
     Extern 172.16.1.0 192.168.0.1 0x80000002 1583 0x2 0x3e6b 36
     mask 255.255.255.0
     Type 2, TOS 0x0, metric 0, fwd addr 0.0.0.0, tag 0.0.0.0
+```
 
 > It says "ASBR 192.168.0.1 advertised an external route 172.16.1.0/24 with total cost = 0"
 
-### Type 7: The NSSA External LSA
+#### Type 7: The NSSA External LSA
 
 -   Area scope
 -   A type 7 LSA will be translated to Type 5 at area boundary
@@ -317,34 +315,31 @@ same packet format as Type 3, but with
 -   Link State ID is the network being advertised
 -   Forwarding address by default is router ID of ASBR.
 
-<!-- -->
-
+```
     Type ID         Adv Rtr      Seq        Age Opt Cksum  Len
     NSSA 172.16.6.0 192.168.48.1 0x80000006 931 0x8 0xe7e5 36
     mask 255.255.255.0
     Type 2, TOS 0x0, metric 0, fwd addr 192.168.48.1, tag 0.0.0.0
-
--   Option=0x8 indicates this ABR supports NSSA and is capable to
-    translate type 7 into type 5.
-
-After translation:
-
+```
+-   Option=0x8 indicates this ABR supports NSSA and is capable to translate type 7 into type 5.
+-   After translation:
+```
     Type   ID          Adv Rtr     Seq        Age Opt Cksum  Len
     Extern *172.16.6.0 192.168.0.3 0x80000005 919 0x2 0xa55f 36
     mask 255.255.255.0
     Type 2, TOS 0x0, metric 0, fwd addr 192.168.48.1, tag 0.0.0.0
-
+```
 -   Adv Rtr is changed to be ABR's address
 -   Forwarding address is still ASBR's address
 
-### Type 9: Graceful Restart LSA
+#### Type 9: Graceful Restart LSA
 
 -   Opaque LSA
 -   Link-local scope
 -   Link-State ID: 8 bits opaque type and 24 bits opaque ID.
 -   Details see [Graceful Restart](/#Graceful_Restart "wikilink")
 
-### Type 10: MPLS Traffic Engineering LSA
+#### Type 10: MPLS Traffic Engineering LSA
 
 -   Opaque LSA
 -   Area-local scope
@@ -369,8 +364,7 @@ After translation:
     -   Type 8 - Unreserved bandwidth (32 octets). Starting from priority 1 to priority 7. Each priority takes 4 octets, in unit of bytes/sec.
     -   Type 9 - Administrative group (4 octets)
 
-<!-- -->
-
+```
     Dec 14 20:30:53.400416   id 1.0.3.128, type OpaqArea (0xa), age 0x2de
     Dec 14 20:30:53.400440   options 0x0
     Dec 14 20:30:53.400466   adv rtr 2.1.1.227, seq 0x80000069, cksum 0xbe38, len 116
@@ -392,9 +386,9 @@ After translation:
                                    Priority 6, 100Mbps
                                    Priority 7, 100Mbps
     Dec 14 20:30:53.400898       Color (9), length 4:  0
+```
 
-The Link-State Database
------------------------
+## The Link-State Database
 
 ### Database Integrity
 
@@ -405,32 +399,21 @@ The Link-State Database
 
 ### The Shortest Path First Algorithm
 
-In essence, it is [Dijkstra's
-algorithm](/:w:Dijkstra's_algorithm "wikilink") (see
-[animation](http://www.cs.sunysb.edu/~skiena/combinatorica/animations/dijkstra.html)).
-We only need get inputs right. In implementation, there are three
-conceptual database:
+In essence, it is Dijkstra's algorithm (see [animation](http://www.cs.sunysb.edu/~skiena/combinatorica/animations/dijkstra.html)). We only need get inputs right. In implementation, there are three conceptual database:
 
 -   Link-state database: contains inputs (router ID, neighbor ID, cost)
--   Cadidate database: intermediate results
+-   Candidate database: intermediate results
 -   Tree database: final results - SPF tree.
 
-SPF run is expensive in terms of CPU cycles. To avoid SPF takes too much
-CPU time, two timers are implemented.
+* SPF run is expensive in terms of CPU cycles. To avoid SPF takes too much CPU time, two timers are implemented.
 
--   After **Three** consecutive rapid SPF runs, a mandtaory (**5
-    second**) hold down timer is fired.
--   A **200 millisecond** delay is pre-configured between back-to-back
-    SPF runs.
-    -   can be altered by *spf-delay* knob (range from 50 ms to 1 sec.
-        Prior to 6.x, default value is 1 second).
-    -   best practive is this value is slightly larger than worst
-        propagation delay in the network.
+-   After **Three** consecutive rapid SPF runs, a mandtaory (**5 second**) hold down timer is fired.
+-   A **200 millisecond** delay is pre-configured between back-to-back SPF runs.
+    -   can be altered by *spf-delay* knob (range from 50 ms to 1 sec. Prior to 6.x, default value is 1 second).
+    -   best practive is this value is slightly larger than worst propagation delay in the network.
+- Given above, SPF runs is shaped to (200ms 200ms 200ms 5s) in time.
 
-Given above, SPF runs is shaped to (200ms 200ms 200ms 5s) in time.
-
-Configuration Options
----------------------
+## Configuration Options
 
 ### Interface Metrics
 
@@ -441,22 +424,20 @@ Configuration Options
 `show ospf interface detail`
 
 -   Can alter an interface metric manually
-
-<!-- -->
-
+```
     [edit protocols ospf]
     area 0.0.0.1 {
       interface fe-0/0/0.0 {
         metric 15;
       }
     }
-
+```
 -   or change *reference-bandwidth*
 
-<!-- -->
-
+```
     [edit protocols ospf]
     reference-bandwidth 1g;
+```
 
 ### Authentication
 
@@ -472,8 +453,7 @@ Configuration Options
     same type)
 -   under OSPF interface, config key
 
-<!-- -->
-
+```
     [edit protocols ospf]
     user@Chablis# show
       area 0.0.0.2 {
@@ -482,29 +462,22 @@ Configuration Options
         authentication-key "$9$9SwLCORrlMXNbvWaZ"; # SECRET-DATA
       }
     }
+```
 
 ### Graceful Restart
 
--   Some network changes are transient, i.e., they will return back to
-    its original states in very short time. We are trying to avoid
-    unnecessary SPF for those transient changes.
--   Requires **all** neighbors support, i.e., it is either all or zero
-    situation. If one neighbor doesn't support this, it will break the
-    whole thing: declares adjacency down and propagate LSAs. Those LSAs
-    will be accepted by other routers and triggers the whole network to
-    converge.
+-   Some network changes are transient, i.e., they will return back to its original states in very short time. We are trying to avoid unnecessary SPF for those transient changes.
+-   Requires **all** neighbors support, i.e., it is either all or zero situation. If one neighbor doesn't support this, it will break the whole thing: declares adjacency down and propagate LSAs. Those LSAs will be accepted by other routers and triggers the whole network to converge.
 
 **Three modes**
 
--   Restart Candidate: the router which knows it will restart (via cli
-    *restart routing*). It will do:
+-   Restart Candidate: the router which knows it will restart (via cli *restart routing*). It will do:
     -   store current forwarding table/adjacency/config in memory;
     -   ask **each** neighbors for assistance via sending a grace LSA
         (type 9);
     -   restart
 -   Possible Helper: default mode for all restart-capable routers
--   Helper: when a router receives a notification, it will transit to
-    Helper mode and do:
+-   Helper: when a router receives a notification, it will transit to Helper mode and do:
     -   maintain adjacency until certain time passed
     -   after being notified the restarting router is back, it sends all
         its database back to restarting router.
@@ -521,19 +494,17 @@ Configuration Options
     -   T=3 (IP address), L=4B, V=restarting router interface IP when it
         connects to a shared segment (LAN).
 
-<!-- -->
-
+```
     Type    ID      Adv Rtr      Seq        Age Opt Cksum  Len
     OpaqLoc 3.0.0.0 192.168.32.2 0x80000001 46  0x2 0xf16a 36
     Grace 90
     Reason 1
+```
 
 **Configuration**
 
--   *restart-duration*: from restarting event to expected adjacency
-    re-establishment, default is 60 seconds.
--   *notify-duration*: from end of restart-duration to declare negihbor
-    is down, default is 30 seconds.
+-   *restart-duration*: from restarting event to expected adjacency re-establishment, default is 60 seconds.
+-   *notify-duration*: from end of restart-duration to declare neighbor is down, default is 30 seconds.
 
 ### Virtual Links
 
@@ -544,10 +515,8 @@ Configuration Options
         be used by other ABR's SPF calculation, nor to be
         re-summarized/populated to avoid loop.
 
-On one backbone router and one ABR connecting two non-backbone areas,
-setup a virutal link to "bring" that ABR into area 0 as if it were
-directly connected to backbone.
-
+On one backbone router and one ABR connecting two non-backbone areas, setup a virutal link to "bring" that ABR into area 0 as if it were directly connected to backbone.
+```
     user@Cabernet# show  <<< backbone router
     area 0.0.0.0 {
       virtual-link neighbor-id 192.168.16.2 transit-area 0.0.0.1;
@@ -562,28 +531,25 @@ directly connected to backbone.
     area 0.0.0.0 {
       virtual-link neighbor-id 192.168.0.1 transit-area 0.0.0.1;
     }
+```
 
-Address Summarization
----------------------
+## Address Summarization
 
--   Stub/NSSA is to reduce the routing table for none-backbone routers,
-    while address summarization is to reduce the routing table for
-    backbone routers.
+-   Stub/NSSA is to reduce the routing table for none-backbone routers, while address summarization is to reduce the routing table for backbone routers.
 -   done by ABR.
 
 ### Area Route Summarization
 
 -   ABR is configured with *area-range*.
 
-<!-- -->
-
+```
     area 0.0.0.2 {
       area-range 192.168.32.0/20;
+```
 
 -   ABR has all routing information
 
-<!-- -->
-
+```
     user@Chardonnay> show route protocol ospf 192.168.32/20
     inet.0: 31 destinations, 32 routes (31 active, 0 holddown, 0 hidden)
     + = Active Route, - = Last Active, * = Both
@@ -597,21 +563,21 @@ Address Summarization
                        > via at-0/1/0.0
     192.168.34.0/24 *[OSPF/10] 00:05:21, metric 7
                        > via at-0/1/0.0
+```
 
--   ABR sends a network summary LSA to area 0, while the metric for
-    summarized route is the highest metric of contributing routes.
+-   ABR sends a network summary LSA to area 0, while the metric for summarized route is the highest metric of contributing routes.
 
-<!-- -->
-
+```
     Type    ID            Adv Rtr     Seq        Age Opt Cksum  Len
     Summary *192.168.32.0 192.168.0.2 0x80000001 276 0x2 0x3b35 28
     mask 255.255.240.0
     TOS 0x0, metric 7
+```
 
 ### NSSA Route Summarization
 
 Same configuration to summarize NSSA external routes.
-
+```
     area 0.0.0.3 {
     nssa {
       default-lsa {
@@ -622,37 +588,23 @@ Same configuration to summarize NSSA external routes.
       area-range 172.16.4.0/22; <<< placing here is to summarize external routes
     }
     area-range 192.168.48.0/20; <<< placing here is to summarize intra-area routes
+```
 
-Summary
--------
+## Summary
 
-In this chapter, we took a very detailed look at the operation of OSPF.
-We discussed each of the link-state advertisement types, including
-packet formats, and showed an example of their use in a sample network.
-We then explored the shortest path first (SPF) algorithm and how it
-calculates the path to each destination in the network. We performed an
-example of the calculation on a small network sample.
+In this chapter, we took a very detailed look at the operation of OSPF. We discussed each of the link-state advertisement types, including packet formats, and showed an example of their use in a sample network. We then explored the shortest path first (SPF) algorithm and how it calculates the path to each destination in the network. We performed an example of the calculation on a small network sample.
 
-We then examined the configuration options within the protocol. We
-looked at the router’s ability to use graceful restart to avoid network
-outages. We then discussed authentication in the network and altering
-the metric values advertised in the router LSAs. Finally, we described
-the uses of virtual links and saw an example of their configuration.
+We then examined the configuration options within the protocol. We looked at the router’s ability to use graceful restart to avoid network outages. We then discussed authentication in the network and altering the metric values advertised in the router LSAs. Finally, we described the uses of virtual links and saw an example of their configuration.
 
-We concluded the chapter with configuration examples of a stub and a
-not-so-stubby area. We explored the effect of these area types on the
-link-state database as well as methods for maintaining reachability in
-the network. Finally, we looked at summarizing internal area and NSSA
-routes on the ABRs before advertising those routes into the OSPF
-backbone.
+We concluded the chapter with configuration examples of a stub and a not-so-stubby area. We explored the effect of these area types on the link-state database as well as methods for maintaining reachability in the network. Finally, we looked at summarizing internal area and NSSA routes on the ABRs before advertising those routes into the OSPF backbone.
 
-Check List
-----------
+### Check List
 
 -   tell format and function of each type of LSA
 -   preferences for OSPF routes
-    -   intra-area routes learned within its own area &gt; learned from
-        other area &gt; type 1 extern routes &gt; type 2 extern routes
+    -   intra-area routes learned within its own area &gt; learned from other area &gt; type 1 extern routes &gt; type 2 extern routes
+        - Type 1 extern route = Cost Adds Up (internal + external)
+        - Type 2 extern route = External cost Only
 -   three data structures used by SPF calculation
 -   use and config of a virtual link
 -   understand stub and NSSA area
